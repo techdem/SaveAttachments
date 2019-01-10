@@ -25,6 +25,7 @@ namespace SaveAttachments
         private void button2_Click(object sender, RibbonControlEventArgs e)
         {
             var context = e.Control.Context as Inspector;
+            
 
             try
             {
@@ -42,13 +43,13 @@ namespace SaveAttachments
                             {
                                 item.SaveAsFile(Path.Combine(pathDialog.SelectedPath, item.FileName));
                             }
+
+                            MessageBox.Show("Attachments downloaded to folder!");
                         }
                         else
                         {
                             MessageBox.Show("Invalid Path...");
-                        }
-
-                        MessageBox.Show("Attachments downloaded to folder!");
+                        }                        
                     }
                     else
                     {
