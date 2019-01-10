@@ -34,16 +34,16 @@ namespace SaveAttachments
                             item.SaveAsFile(Path.Combine(pathDialog.SelectedPath, item.FileName));
                         }
 
-                        MessageBox.Show("Attachments downloaded to folder!");
+                        MessageBox.Show("Attachments downloaded to folder!", "QAA");
                     }
                     else
                     {
-                        MessageBox.Show("Invalid Path...");
+                        MessageBox.Show("Invalid Path...", "QAA");
                     }                    
                 }
                 else
                 {
-                    MessageBox.Show("No attachments found!");
+                    MessageBox.Show("No attachments found!", "QAA");
                 }
             }
         }

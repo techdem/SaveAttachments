@@ -25,11 +25,12 @@ namespace SaveAttachments
         private void button2_Click(object sender, RibbonControlEventArgs e)
         {
             var context = e.Control.Context as Inspector;
-            
 
             try
             {
-                var mailItem = context.CurrentItem as MailItem;
+                var application = Globals.ThisAddIn.Application;
+                Selection selection = application.ActiveExplorer().Selection;
+                var mailItem = selection[1] as MailItem;
 
                 if (mailItem != null)
                 {
@@ -44,23 +45,23 @@ namespace SaveAttachments
                                 item.SaveAsFile(Path.Combine(pathDialog.SelectedPath, item.FileName));
                             }
 
-                            MessageBox.Show("Attachments downloaded to folder!");
+                            MessageBox.Show("Attachments downloaded to folder!", "QAA");
                         }
                         else
                         {
-                            MessageBox.Show("Invalid Path...");
+                            MessageBox.Show("Invalid Path...", "QAA");
                         }                        
                     }
                     else
                     {
-                        MessageBox.Show("No attachments found!");
+                        MessageBox.Show("No attachments found!", "QAA");
                     }
                 }
             }
 
             catch (NullReferenceException ex)
             {
-                MessageBox.Show("Please select an e-mail first...\n\nException:\n " + ex);
+                MessageBox.Show("Please select an e-mail first...\n\nException:\n " + ex, "QAA");
             }
         }
     }
