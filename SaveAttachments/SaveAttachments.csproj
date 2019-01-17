@@ -178,6 +178,9 @@
     <EmbeddedResource Include="RibbonMessage.resx">
       <DependentUpon>RibbonMessage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SelectSites.resx">
+      <DependentUpon>SelectSites.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="ClassDiagram1.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -192,6 +195,12 @@
     </Compile>
     <Compile Include="RibbonMessage.Designer.cs">
       <DependentUpon>RibbonMessage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SelectSites.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectSites.Designer.cs">
+      <DependentUpon>SelectSites.cs</DependentUpon>
     </Compile>
     <Compile Include="testRibbon.cs">
       <SubType>Component</SubType>
