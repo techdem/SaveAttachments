@@ -21,24 +21,6 @@ namespace SaveAttachments
 
         private void button1_Click(object sender, RibbonControlEventArgs e)
         {
-            
-
-            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            //WebClient client = new WebClient();
-            //client.UseDefaultCredentials = true;
-            //string sitesInput = client.DownloadString("https://documents.i.opw.ie/share/proxy/alfresco/api/people/chiribest/sites/");
-            //var serializer = new JavaScriptSerializer();
-            //dynamic sitesArray = serializer.DeserializeObject(sitesInput);
-            //ArrayList userSites = new ArrayList();
-            //string testSites = "";
-
-            //foreach (dynamic s in sitesArray) {
-            //    userSites.Add(s["title"]);
-            //    testSites += "\n"+s["title"];
-            //}
-
-            //MessageBox.Show(testSites, "QAA");
-
             SelectSites displaySites = new SelectSites();
             displaySites.Show();
         }

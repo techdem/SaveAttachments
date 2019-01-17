@@ -31,6 +31,8 @@ namespace SaveAttachments
             string sitesInput = client.DownloadString("https://documents.i.opw.ie/share/proxy/alfresco/api/people/chiribest/sites/");
             var serializer = new JavaScriptSerializer();
             sitesArray = serializer.DeserializeObject(sitesInput);
+            listBox1.Items.Add("Home");
+            listBox1.Items.Add("Shared");
 
             foreach (dynamic s in sitesArray)
             {
@@ -46,8 +48,19 @@ namespace SaveAttachments
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string siteURL = "http://documents.i.opw.ie/share/page/site/" + shortNames[listBox1.SelectedIndex];
-            System.Diagnostics.Process.Start(siteURL);
+            if (listBox1.SelectedIndex == 0)
+            {
+                System.Diagnostics.Process.Start("https://documents.i.opw.ie/share/page/user/chiribest/dashboard");
+            }
+            else if (listBox1.SelectedIndex == 1)
+            {
+                System.Diagnostics.Process.Start("https://documents.i.opw.ie/share/page/context/shared/sharedfiles");
+            }
+            else
+            {
+                string siteURL = "http://documents.i.opw.ie/share/page/site/" + shortNames[listBox1.SelectedIndex - 2];
+                System.Diagnostics.Process.Start(siteURL);
+            }
         }
     }
 }

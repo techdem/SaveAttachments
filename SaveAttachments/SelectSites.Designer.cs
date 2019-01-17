@@ -35,10 +35,12 @@
             // 
             // listBox1
             // 
+            this.listBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listBox1.FormattingEnabled = true;
+            this.listBox1.ItemHeight = 25;
             this.listBox1.Location = new System.Drawing.Point(12, 51);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(260, 420);
+            this.listBox1.Size = new System.Drawing.Size(260, 404);
             this.listBox1.TabIndex = 0;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
