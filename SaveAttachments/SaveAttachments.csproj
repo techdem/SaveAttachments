@@ -202,12 +202,6 @@
     <Compile Include="SelectSites.Designer.cs">
       <DependentUpon>SelectSites.cs</DependentUpon>
     </Compile>
-    <Compile Include="testRibbon.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="testRibbon.Designer.cs">
-      <DependentUpon>testRibbon.cs</DependentUpon>
-    </Compile>
     <Compile Include="RibbonMain.cs">
       <SubType>Component</SubType>
     </Compile>
