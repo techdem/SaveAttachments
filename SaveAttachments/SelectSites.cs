@@ -16,7 +16,7 @@ namespace SaveAttachments
     public partial class SelectSites : Form
     {
         ArrayList shortNames = new ArrayList();
-        ArrayList nodeIDs = new ArrayList();
+        ArrayList backTrack = new ArrayList();
 
         WebClient client = new WebClient();
         JavaScriptSerializer serializer = new JavaScriptSerializer();
@@ -24,18 +24,21 @@ namespace SaveAttachments
         string selectedAction;
         dynamic sitesArray;
         dynamic browseContent;
+        String id = "";
+        Boolean goToHome = false;
+        Boolean browsingHome = true;
 
         public SelectSites (string action)
         {
             InitializeComponent();
             this.selectedAction = action;
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            client.UseDefaultCredentials = true;
         }
 
         private void SelectSites_Load(object sender, EventArgs e)
         {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            client.UseDefaultCredentials = true;
-
             sitesArray = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/share/proxy/alfresco/api/people/chiribest/sites/"));
             listBox1.Items.Add("Home");
             listBox1.Items.Add("Shared");
@@ -49,51 +52,82 @@ namespace SaveAttachments
         private void button1_Click(object sender, EventArgs e)
         {
             String url;
-            String id = "";
 
-            if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Home"))
+            if (!button1.Text.Equals("Back"))
             {
-                url = "https://documents.i.opw.ie/share/page/user/chiribest/dashboard";
-                browseContent = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children"));                
-            }
-            else if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Shared"))
-            {
-                url = "https://documents.i.opw.ie/share/page/context/shared/sharedfiles";
-                browseContent = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-shared-/children"));
-            }
-            else
-            {
-                //url = "http://documents.i.opw.ie/share/page/site/" + shortNames[listBox1.SelectedIndex - 2];
-
-                if (browseContent != null)
+                if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Home"))
                 {
-                    foreach (dynamic d in browseContent["list"]["entries"])
-                    {
-                        if (d["entry"]["name"].Equals(listBox1.GetItemText(listBox1.SelectedItem)))
-                        {
-                            id = d["entry"]["id"];
-                        }
-                    }
+                    url = "https://documents.i.opw.ie/share/page/user/chiribest/dashboard";
+                    browseContent = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children"));
+                }
+                else if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Shared"))
+                {
+                    url = "https://documents.i.opw.ie/share/page/context/shared/sharedfiles";
+                    browseContent = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-shared-/children"));
                 }
                 else
                 {
-                    foreach (dynamic d in sitesArray)
+                    //url = "http://documents.i.opw.ie/share/page/site/" + shortNames[listBox1.SelectedIndex - 2];
+
+                    if (goToHome)
                     {
-                        if (d["title"].Equals(listBox1.GetItemText(listBox1.SelectedItem)))
+                        foreach (dynamic d in browseContent["list"]["entries"])
                         {
-                            id = d["node"].Substring(d["node"].IndexOf("Store/") + 6);
+                            if (d["entry"]["name"].Equals(listBox1.GetItemText(listBox1.SelectedItem)))
+                            {
+                                backTrack.Add(d["entry"]["parentId"]);
+                                id = d["entry"]["id"];
+                            }
                         }
                     }
-                }
+                    else
+                    {
+                        foreach (dynamic d in sitesArray)
+                        {
+                            if (d["title"].Equals(listBox1.GetItemText(listBox1.SelectedItem)))
+                            {
+                                id = d["node"].Substring(d["node"].IndexOf("Store/") + 6);
+                            }
+                        }
+                    }
 
-                browseContent = serializer.DeserializeObject(client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", id)));
+                    browseContent = serializer.DeserializeObject(client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", id)));
+                }
+            }
+            else if (backTrack.Count > 0)
+            {
+                browseContent = serializer.DeserializeObject(client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", backTrack[backTrack.Count - 1])));
+                backTrack.RemoveAt(backTrack.Count - 1);
+            }
+            else
+            {
+                goToHome = true;
             }
 
-            listBox1.Items.Clear();
-
-            foreach (dynamic d in browseContent["list"]["entries"])
+            if (!goToHome)
             {
-                listBox1.Items.Add(d["entry"]["name"]);
+                listBox1.Items.Clear();
+
+                foreach (dynamic d in browseContent["list"]["entries"])
+                {
+                    listBox1.Items.Add(d["entry"]["name"]);
+                }
+
+                browsingHome = false;
+            }
+            else
+            {
+                listBox1.Items.Clear();
+                listBox1.Items.Add("Home");
+                listBox1.Items.Add("Shared");
+
+                foreach (dynamic d in sitesArray)
+                {
+                    listBox1.Items.Add(d["title"]);
+                }
+
+                goToHome = false;
+                browsingHome = true;
             }
 
             //switch (selectedAction)
@@ -116,22 +150,23 @@ namespace SaveAttachments
 
             //        break;
             //}
+
+            button1.Text = "Back";
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (browseContent != null)
+            if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Home"))
             {
-                if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Home"))
-                {
-                    button1.Text = "Open Home";
-                }
-                else if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Shared"))
-                {
-                    button1.Text = "Open Shared";
-                }
-                else
-                {
+                button1.Text = "Open Home";
+            }
+            else if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Shared"))
+            {
+                button1.Text = "Open Shared";
+            }
+            else
+            {
+                if (!browsingHome)
                     foreach (dynamic d in browseContent["list"]["entries"])
                     {
                         if (d["entry"]["name"].Equals(listBox1.GetItemText(listBox1.SelectedItem)) && d["entry"]["nodeType"].Equals("cm:folder"))
@@ -143,6 +178,9 @@ namespace SaveAttachments
                             button1.Text = "Select file";
                         }
                     }
+                else
+                {
+                    button1.Text = "Open Site";
                 }
             }
         }
