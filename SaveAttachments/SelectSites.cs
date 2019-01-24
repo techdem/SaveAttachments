@@ -69,7 +69,7 @@ namespace SaveAttachments
                 {
                     //url = "http://documents.i.opw.ie/share/page/site/" + shortNames[listBox1.SelectedIndex - 2];
 
-                    if (goToHome)
+                    if (!browsingHome)
                     {
                         foreach (dynamic d in browseContent["list"]["entries"])
                         {
@@ -104,10 +104,10 @@ namespace SaveAttachments
                 goToHome = true;
             }
 
+            listBox1.Items.Clear();
+
             if (!goToHome)
             {
-                listBox1.Items.Clear();
-
                 foreach (dynamic d in browseContent["list"]["entries"])
                 {
                     listBox1.Items.Add(d["entry"]["name"]);
