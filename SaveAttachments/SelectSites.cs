@@ -46,7 +46,7 @@ namespace SaveAttachments
             sitesArray = serializer.DeserializeObject(sitesJSON);
             listBox1.Items.Add("Home");
             listBox1.Items.Add("Shared");
-            log += "Load_JSON: " + sitesJSON + "\n";
+            log += "Load | JSON: " + sitesJSON + "\n";
 
             foreach (dynamic d in sitesArray)
             {
@@ -60,16 +60,23 @@ namespace SaveAttachments
         private void button1_Click(object sender, EventArgs e)
         {
             log = "";
+            String browseJSON = "";
 
             if (!button1.Text.Equals("Back"))
             {
                 if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Home"))
                 {
-                    browseContent = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children"));
+                    browseJSON = client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children");
+                    browseContent = serializer.DeserializeObject(browseJSON);
+                    log += "Button | Open Home: " + browseJSON + "\n";
+                    Debug.WriteLine(log);
                 }
                 else if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Shared"))
                 {
+                    browseJSON = client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children");
                     browseContent = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-shared-/children"));
+                    log += "Button | Open Shared: " + browseJSON + "\n";
+                    Debug.WriteLine(log);
                 }
                 else
                 {
@@ -80,7 +87,10 @@ namespace SaveAttachments
                             if (d["entry"]["name"].Equals(listBox1.GetItemText(listBox1.SelectedItem)))
                             {
                                 backTrack.Add(d["entry"]["parentId"]);
+                                log += "Button | Parent Folder: " + d["entry"]["parentId"] + "\n";
                                 id = d["entry"]["id"];
+                                log += "Button | Open Folder: " + d["entry"]["id"] + "\n";
+                                Debug.WriteLine(log);
                             }
                         }
                     }
@@ -91,17 +101,25 @@ namespace SaveAttachments
                             if (d["title"].Equals(listBox1.GetItemText(listBox1.SelectedItem)))
                             {
                                 id = d["node"].Substring(d["node"].IndexOf("Store/") + 6);
+                                log += "Button | Open Site: " + d["node"].Substring(d["node"].IndexOf("Store/") + 6) + "\n";
+                                Debug.WriteLine(log);
                             }
                         }
                     }
 
-                    browseContent = serializer.DeserializeObject(client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", id)));
+                    browseJSON = client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", id));
+                    browseContent = serializer.DeserializeObject(browseJSON);
+                    log += "Button | Open: " + browseJSON + "\n";
                 }
             }            
             else if (backTrack.Count > 0)
             {
-                browseContent = serializer.DeserializeObject(client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", backTrack[backTrack.Count - 1])));
+                browseJSON = client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", backTrack[backTrack.Count - 1]));
+                browseContent = serializer.DeserializeObject(browseJSON);
+                log += "Button | Backtracking: " + browseJSON + "\n";
+                log += "Button | Backtracking Remove: " + backTrack[backTrack.Count -1] + "\n";
                 backTrack.RemoveAt(backTrack.Count - 1);
+                Debug.WriteLine(log);
             }
             else
             {
@@ -109,19 +127,26 @@ namespace SaveAttachments
             }
 
             listBox1.Items.Clear();
+            log = "";
 
             if (!goToHome && !button1.Text.Equals("Select file"))
             {
                 foreach (dynamic d in browseContent["list"]["entries"])
                 {
                     listBox1.Items.Add(d["entry"]["name"]);
+                    log += "Button | Rendering Node: " + d["entry"]["name"] + "\n";
                 }
 
                 browsingHome = false;
+                Debug.WriteLine(log);
             }
             else if (button1.Text.Equals("Select file"))
             {
+                String downloadLink = String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/content", id);
+                log += "Button | Download link: " + downloadLink + "\n";
                 Process.Start("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/" + id + "/content");
+                log += "Button | Downloading file \n";
+                Debug.WriteLine(log);
             }
             else
             {
@@ -132,6 +157,8 @@ namespace SaveAttachments
                 foreach (dynamic d in sitesArray)
                 {
                     listBox1.Items.Add(d["title"]);
+                    log += "Button | Rendering Sites: " + d["title"] + "\n";
+                    Debug.WriteLine(log);
                 }
 
                 goToHome = false;
@@ -164,13 +191,19 @@ namespace SaveAttachments
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            log = "";
+
             if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Home"))
             {
                 button1.Text = "Open Home";
+                log += "Select | Home \n";
+                Debug.WriteLine(log);
             }
             else if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Shared"))
             {
                 button1.Text = "Open Shared";
+                log += "Select | Shared \n";
+                Debug.WriteLine(log);
             }
             else
             {
@@ -181,16 +214,22 @@ namespace SaveAttachments
                         if (d["entry"]["name"].Equals(listBox1.GetItemText(listBox1.SelectedItem)) && d["entry"]["nodeType"].Equals("cm:folder"))
                         {
                             button1.Text = "Open folder";
+                            log += "Select | Folder \n";
+                            Debug.WriteLine(log);
                         }
                         else if (d["entry"]["name"].Equals(listBox1.GetItemText(listBox1.SelectedItem)) && d["entry"]["nodeType"].Equals("cm:content"))
                         {
                             button1.Text = "Select file";
+                            log += "Select | File \n";
+                            Debug.WriteLine(log);
                         }
                     }
                 }
                 else
                 {
                     button1.Text = "Open Site";
+                    log += "Select | Select Site \n";
+                    Debug.WriteLine(log);
                 }
             }
         }
