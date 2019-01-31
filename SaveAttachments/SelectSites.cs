@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace SaveAttachments
         string selectedAction;
         dynamic sitesArray;
         dynamic browseContent;
-        String id = "";
+        String log;
+        String id;
         Boolean goToHome = false;
         Boolean browsingHome = true;
 
@@ -39,36 +41,38 @@ namespace SaveAttachments
 
         private void SelectSites_Load(object sender, EventArgs e)
         {
-            sitesArray = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/share/proxy/alfresco/api/people/chiribest/sites/"));
+            log = "";
+            String sitesJSON = client.DownloadString("https://documents.i.opw.ie/share/proxy/alfresco/api/people/chiribest/sites/");
+            sitesArray = serializer.DeserializeObject(sitesJSON);
             listBox1.Items.Add("Home");
             listBox1.Items.Add("Shared");
+            log += "Load_JSON: " + sitesJSON + "\n";
 
             foreach (dynamic d in sitesArray)
             {
                 listBox1.Items.Add(d["title"]);
+                log += "Load_dynamic: " + d["title"] + "\n";
             }
+
+            Debug.WriteLine(log);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            String url;
+            log = "";
 
             if (!button1.Text.Equals("Back"))
             {
                 if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Home"))
                 {
-                    url = "https://documents.i.opw.ie/share/page/user/chiribest/dashboard";
                     browseContent = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children"));
                 }
                 else if (listBox1.GetItemText(listBox1.SelectedItem).Equals("Shared"))
                 {
-                    url = "https://documents.i.opw.ie/share/page/context/shared/sharedfiles";
                     browseContent = serializer.DeserializeObject(client.DownloadString("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/-shared-/children"));
                 }
                 else
                 {
-                    //url = "http://documents.i.opw.ie/share/page/site/" + shortNames[listBox1.SelectedIndex - 2];
-
                     if (!browsingHome)
                     {
                         foreach (dynamic d in browseContent["list"]["entries"])
@@ -93,7 +97,7 @@ namespace SaveAttachments
 
                     browseContent = serializer.DeserializeObject(client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", id)));
                 }
-            }
+            }            
             else if (backTrack.Count > 0)
             {
                 browseContent = serializer.DeserializeObject(client.DownloadString(String.Format("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/{0}/children", backTrack[backTrack.Count - 1])));
@@ -106,7 +110,7 @@ namespace SaveAttachments
 
             listBox1.Items.Clear();
 
-            if (!goToHome)
+            if (!goToHome && !button1.Text.Equals("Select file"))
             {
                 foreach (dynamic d in browseContent["list"]["entries"])
                 {
@@ -114,6 +118,10 @@ namespace SaveAttachments
                 }
 
                 browsingHome = false;
+            }
+            else if (button1.Text.Equals("Select file"))
+            {
+                Process.Start("https://documents.i.opw.ie/alfresco/api/-default-/public/alfresco/versions/1/nodes/" + id + "/content");
             }
             else
             {
@@ -167,6 +175,7 @@ namespace SaveAttachments
             else
             {
                 if (!browsingHome)
+                {
                     foreach (dynamic d in browseContent["list"]["entries"])
                     {
                         if (d["entry"]["name"].Equals(listBox1.GetItemText(listBox1.SelectedItem)) && d["entry"]["nodeType"].Equals("cm:folder"))
@@ -178,6 +187,7 @@ namespace SaveAttachments
                             button1.Text = "Select file";
                         }
                     }
+                }
                 else
                 {
                     button1.Text = "Open Site";
